@@ -10,7 +10,7 @@
 
 import {PosInfo} from "./z80";
 import {CompilationError} from "../types/Error";
-import {parseData} from '../compiler/Compiler';
+import {DEVICE_ZX81, parseData} from '../compiler/Compiler';
 
 /**
  * Parse a number.
@@ -98,11 +98,28 @@ const zx81chars = new Map<string, number>([
 ]);
 
 /**
+ * Parse a character written in ASCII depending on the specified device.
+ * @param pos Position of the character in the source code.
+ * @param c The ASCII character.
+ */
+export function parseChar(pos: PosInfo, c: string): [number] {
+  if(parseData.deviceName === DEVICE_ZX81) {
+    return parseZX81Char(pos, c);
+  }
+  // Default: No conversion
+  const charCode = c.charCodeAt(0)
+  if(charCode > 0xff) throw new CompilationError({filename: parseData.fileName, pos: pos},
+    `Unsupported character: ${c}`);
+
+  return [charCode];
+}
+
+/**
  * Parse a ZX81 character written in ASCII.
  * @param pos Position of the character in the source code.
  * @param c The ASCII character.
  */
-export function parseZX81Char(pos: PosInfo, c: string): [number] {
+function parseZX81Char(pos: PosInfo, c: string): [number] {
   // Convert capital letters to their ZX81 counterparts.
   if(c >= 'A' && c < 'Z') return [c.charCodeAt(0) - 0x41 + 0x26];
   // Convert lowercase letters to their uppercase and inverted ZX81 counterparts.

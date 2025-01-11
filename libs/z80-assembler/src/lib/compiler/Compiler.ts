@@ -22,6 +22,8 @@ import {
   assetSystemVariables
 } from "./Assets";
 
+export const DEVICE_ZX81 = 'zx81';
+
 /**
  * Type of the internal data.
  */
@@ -169,7 +171,7 @@ function compile(filepath: string, code: string, getFileCode: (filename: string)
  * @param info The parsed AST (lines).
  */
 function postProcessing(info: LinesInfo): LinesInfo[] {
-  if(parseData.deviceName !== 'zx81') return [info];
+  if(parseData.deviceName !== DEVICE_ZX81) return [info];
 
   return [
     parseCode('@internal/characters.zx81', assetCharacters),
