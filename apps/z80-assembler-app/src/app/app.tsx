@@ -21,6 +21,7 @@ import AppEditor, {AppEditorHandlers} from "./editor";
 import Errors from "./errors";
 import {closeDropdown} from "./misc";
 import {fileSave} from "browser-fs-access";
+import {Player} from './player';
 
 interface BinaryOrOpCodesProps {
   showOpCodes: boolean,
@@ -111,6 +112,7 @@ export function App() {
         </div>
         <div className="flex flex-col w-1/3 z-0">
           <BinaryOrOpCodes showOpCodes={showOpCodes} chunks={chunks}/>
+          <Player visible={!showOpCodes} bytes={bytes}/>
         </div>
       </div>
       <Errors errors={errors} />
