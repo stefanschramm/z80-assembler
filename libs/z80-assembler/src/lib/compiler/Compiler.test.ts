@@ -8,11 +8,12 @@
  * Copyrights: 	Copyright (C) 2023 Sebastien Andrivet
  */
 
+import {mapAsciiChar} from "./CharacterMapping";
 import {compile as rawCompile} from "./Compiler";
 import {expect} from "vitest";
 
-function compileCode(code: string) {
-  const info = rawCompile('test.asm', code, () => '');
+function compileCode(code: string, mapCharacter: undefined | ((c: string) => number) = undefined) {
+  const info = rawCompile('test.asm', code, () => '', mapCharacter);
   expect(info.errs[0]?.toString()).toBeUndefined();
   return info.bytes;
 }
@@ -1836,6 +1837,11 @@ test("Declaring bytes with expressions", () => {
 test("Declaring string", () => {
   const bytes = compileCode('db "HELLO WORLD"');
   expect(bytes).toEqual([0x2D, 0x2A, 0x31, 0x31, 0x34, 0x00, 0x3C, 0x34, 0x37, 0x31, 0x29]);
+});
+
+test("Declaring string without ZX 81 mapping", () => {
+  const bytes = compileCode('db "HELLO WORLD"', mapAsciiChar);
+  expect(bytes).toEqual([0x48, 0x45, 0x4c, 0x4c, 0x4f, 0x20, 0x57, 0x4f, 0x52, 0x4c, 0x44]);
 });
 
 test("Declaring string with simple quotes", () => {

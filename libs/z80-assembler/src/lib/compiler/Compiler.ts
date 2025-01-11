@@ -21,6 +21,9 @@ import {
   assetDisplay,
   assetSystemVariables
 } from "./Assets";
+import {mapZx81Char} from "./CharacterMapping";
+
+export const DEVICE_ZX81 = 'zx81';
 
 /**
  * Type of the internal data.
@@ -38,6 +41,8 @@ interface ParseData {
   fileName: string,
   // The function to use when including a file to get its source code.
   getFileCode: (filename: string) => string //
+  // The function to use for mapping characters of string literals
+  mapCharacter: (c: string) => number
 }
 
 /**
@@ -51,7 +56,8 @@ const parseData: ParseData = {
   deviceName: "",
   basePath: '',
   fileName: '',
-  getFileCode: () => ''
+  getFileCode: () => '',
+  mapCharacter: mapZx81Char,
 };
 
 /**
@@ -129,12 +135,14 @@ function getBasePath(filepath: string): string {
  * @param code The assembly source code.
  * @param getFileCode A function to get the content of included files.
  */
-function compile(filepath: string, code: string, getFileCode: (filename: string) => string): CompilationInfo {
+function compile(filepath: string, code: string, getFileCode: (filename: string) => string, mapCharacter: undefined | ((c: string) => number) = undefined): CompilationInfo {
   // Set default values globally
   parseData.outputName = filepath.replace(/\..*$/, '') + '.P';
   parseData.sldName = parseData.outputName.replace(/\.P$/, '.sld');
   parseData.basePath = getBasePath(filepath);
   parseData.getFileCode = getFileCode;
+  // Default: Map ZX 81 chars to stay compatible with previous behaviour
+  parseData.mapCharacter = mapCharacter ?? mapZx81Char;
 
   try {
     // Reset the labels.
@@ -169,7 +177,7 @@ function compile(filepath: string, code: string, getFileCode: (filename: string)
  * @param info The parsed AST (lines).
  */
 function postProcessing(info: LinesInfo): LinesInfo[] {
-  if(parseData.deviceName !== 'zx81') return [info];
+  if(parseData.deviceName !== DEVICE_ZX81) return [info];
 
   return [
     parseCode('@internal/characters.zx81', assetCharacters),
